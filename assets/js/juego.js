@@ -5,10 +5,12 @@
     * S = PICAS
 */
 
+
 let deck = [];
 const tipos = ['C', 'D', 'H', 'S'];
 const especiales = ['A', 'J', 'Q', 'K']
 
+//Crea una nueva baraja 
 const crearDeck = () =>{
     for(let i = 2; i<= 10; i++){
         for (let tipo of tipos) {
@@ -22,10 +24,24 @@ const crearDeck = () =>{
         }
     }
 
-    console.log(deck);
     deck = _.shuffle(deck);
     console.log(deck);
     return deck;
 }
 
 crearDeck();
+
+//Me permite pedir una carta
+
+const pedirCarta = () =>{ 
+
+    if(deck.length === 0){
+        throw 'No hay cartas en el deck';
+    }
+
+    let cartaSelec = deck.pop();
+    console.log({cartaSelec});
+    return cartaSelec;
+}
+
+pedirCarta();
