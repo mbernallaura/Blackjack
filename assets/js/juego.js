@@ -10,10 +10,11 @@ const tipos = ['C', 'D', 'H', 'S'];
 const especiales = ['A', 'J', 'Q', 'K'];
 let puntosJugador = 0,
     puntosMaquina = 0;
-    
+
 //Referencias del HTML
 const btnPedir = document.querySelector('#btnPedir');
 const puntosHTML = document.querySelectorAll('small');
+const divCartasJugador = document.querySelector('#jugador-cartas');
 
 //Crea una nueva baraja 
 const crearDeck = () =>{
@@ -71,5 +72,16 @@ btnPedir.addEventListener('click', () => {
     puntosJugador = puntosJugador + valorCarta (carta);
     puntosHTML[0].innerText = puntosJugador;
 
-    console.log({puntosJugador});
+    const imgCarta = document.createElement('img');
+    imgCarta.src = `assets/cartas/${carta}.png`;
+    imgCarta.classList.add('carta');
+    divCartasJugador.append(imgCarta);
+
+    if(puntosJugador > 21){
+        console.warn('Perdiste');
+        btnPedir.disabled = true;
+    }else if (puntosJugador === 21){
+        console.warn('21, Genial!');
+        btnPedir.disabled = true;
+    }
 });
