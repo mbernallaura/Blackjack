@@ -14,6 +14,7 @@ let puntosJugador = 0,
 //Referencias del HTML
 const btnPedir = document.querySelector('#btnPedir');
 const btnDetener = document.querySelector('#btnDetener');
+const btnNuevo = document.querySelector('#btnNuevo');
 const puntosHTML = document.querySelectorAll('small');
 const divCartasJugador = document.querySelector('#jugador-cartas');
 const divCartasMaquina = document.querySelector('#computadora-cartas')
@@ -84,6 +85,18 @@ const turnoMaquina = (puntosMinimos) =>{
         }
 
     } while ((puntosMaquina < puntosMinimos) && (puntosMinimos <= 21));
+
+    setTimeout(() => {
+        if(puntosMinimos === puntosMaquina){
+            alert('Empatados')
+        }else if(puntosMinimos > 21){
+            alert('Perdiste, Gana la Computadora');
+        }else if(puntosMaquina > 21){
+            alert('Ganaste!');
+        }else if(puntosMaquina > puntosMinimos){
+            alert('Perdiste, Gana la Computadora');
+        }
+    }, 70);
 }
 
 //Nota: Callback: Es una funcion que se esta mandando como argumento
@@ -115,4 +128,18 @@ btnDetener.addEventListener('click', () =>{
     btnPedir.disabled = true;
     btnDetener.disabled = true;
     turnoMaquina(puntosJugador);
+});
+
+btnNuevo.addEventListener('click', () =>{
+    console.clear();
+    deck = [];
+    crearDeck();
+    puntosJugador = 0;
+    puntosMaquina = 0;
+    puntosHTML[0].innerText = 0;
+    puntosHTML[1].innerText = 0;
+    divCartasJugador.innerHTML = ''; 
+    divCartasMaquina.innerHTML = ''; 
+    btnPedir.disabled = false;
+    btnDetener.disabled = false;
 });
