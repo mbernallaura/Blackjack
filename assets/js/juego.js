@@ -13,8 +13,10 @@ let puntosJugador = 0,
 
 //Referencias del HTML
 const btnPedir = document.querySelector('#btnPedir');
+const btnDetener = document.querySelector('#btnDetener');
 const puntosHTML = document.querySelectorAll('small');
 const divCartasJugador = document.querySelector('#jugador-cartas');
+const divCartasMaquina = document.querySelector('#computadora-cartas')
 
 //Crea una nueva baraja 
 const crearDeck = () =>{
@@ -65,6 +67,25 @@ const valorCarta = (carta) =>{
            : valor * 1;
 }
 
+//Turno de la Maquina
+const turnoMaquina = (puntosMinimos) =>{
+    do {
+        const carta = pedirCarta();
+        puntosMaquina = puntosMaquina + valorCarta (carta);
+        puntosHTML[1].innerText = puntosMaquina;
+
+        const imgCarta = document.createElement('img');
+        imgCarta.src = `assets/cartas/${carta}.png`;
+        imgCarta.classList.add('carta');
+        divCartasMaquina.append(imgCarta);
+
+        if(puntosMinimos > 21){
+            break;
+        }
+
+    } while ((puntosMaquina < puntosMinimos) && (puntosMinimos <= 21));
+}
+
 //Nota: Callback: Es una funcion que se esta mandando como argumento
 //Eventos
 btnPedir.addEventListener('click', () => {
@@ -80,8 +101,18 @@ btnPedir.addEventListener('click', () => {
     if(puntosJugador > 21){
         console.warn('Perdiste');
         btnPedir.disabled = true;
+        btnDetener.disabled = true;
+        turnoMaquina(puntosJugador);
     }else if (puntosJugador === 21){
         console.warn('21, Genial!');
         btnPedir.disabled = true;
+        btnDetener.disabled = true;
+        turnoMaquina(puntosJugador);
     }
+});
+
+btnDetener.addEventListener('click', () =>{
+    btnPedir.disabled = true;
+    btnDetener.disabled = true;
+    turnoMaquina(puntosJugador);
 });
