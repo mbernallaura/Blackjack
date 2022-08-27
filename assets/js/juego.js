@@ -8,26 +8,43 @@
 //agregando dos mas en el final
 //Esto sirve para que no se pueda llamar el objeto directamente
 //A todo esto se le llama patron modulo
-(() =>{
+const miModulo = (() =>{
     //Este 'use strict' sirve para que el codigo sea mas limpio 
     'use strict'
 
     let deck = [];
-    const tipos = ['C', 'D', 'H', 'S'];
-    const especiales = ['A', 'J', 'Q', 'K'];
-    let puntosJugador = 0,
-        puntosMaquina = 0;
+    const tipos = ['C', 'D', 'H', 'S'],
+          especiales = ['A', 'J', 'Q', 'K'];
+    let puntosJugadores = [];
 
     //Referencias del HTML
-    const btnPedir = document.querySelector('#btnPedir');
-    const btnDetener = document.querySelector('#btnDetener');
-    const btnNuevo = document.querySelector('#btnNuevo');
-    const puntosHTML = document.querySelectorAll('small');
-    const divCartasJugador = document.querySelector('#jugador-cartas');
-    const divCartasMaquina = document.querySelector('#computadora-cartas')
+    const btnPedir = document.querySelector('#btnPedir'),
+          btnDetener = document.querySelector('#btnDetener'),
+          btnNuevo = document.querySelector('#btnNuevo'),
+          puntosHTML = document.querySelectorAll('small'),
+          divCartasJugadores = document.querySelectorAll('.divCartas');
+
+    const inicializarJuego = (numJugadores = 2) =>{
+        deck = crearDeck();
+        puntosJugadores = [];
+
+        for (let i = 0; i < numJugadores; i++) {
+            puntosJugadores.push(0);  
+        }
+        
+        // puntosHTML[0].innerText = 0;
+        // puntosHTML[1].innerText = 0;
+        //Hacer lo anterior de forma optima
+        puntosHTML.forEach(elem => elem.innerText = 0)
+        divCartasJugadores.forEach(elem => elem.innerHTML = '')
+        
+        btnPedir.disabled = false;
+        btnDetener.disabled = false;
+    }
 
     //Crea una nueva baraja 
     const crearDeck = () =>{
+        deck = [];
         for(let i = 2; i<= 10; i++){
             for (let tipo of tipos) {
                 deck.push(i + tipo);
@@ -40,10 +57,8 @@
             }
         }
 
-        deck = _.shuffle(deck);
-        return deck;
+        return _.shuffle(deck);
     }
-    crearDeck();
 
     //Me permite pedir una carta
     const pedirCarta = () =>{ 
@@ -51,8 +66,7 @@
             throw 'No hay cartas en el deck';
         }
 
-        const cartaSelec = deck.pop();
-        return cartaSelec;
+        return deck.pop();
     }
 
     //Nota: Todos los strings en JS, pueden ser trabajados como si fueran un arreglo
@@ -74,23 +88,22 @@
             : valor * 1;
     }
 
-    //Turno de la Maquina
-    const turnoMaquina = (puntosMinimos) =>{
-        do {
-            const carta = pedirCarta();
-            puntosMaquina = puntosMaquina + valorCarta (carta);
-            puntosHTML[1].innerText = puntosMaquina;
+    //turno: 0= primer jugador y el ultimo es el turno de la maquina
+    const acumularPuntos = (carta, turno) =>{
+        puntosJugadores[turno] = puntosJugadores[turno] + valorCarta (carta);
+        puntosHTML[turno].innerText = puntosJugadores[turno];
+        return puntosJugadores[turno];
+    }
 
-            const imgCarta = document.createElement('img');
-            imgCarta.src = `assets/cartas/${carta}.png`;
-            imgCarta.classList.add('carta');
-            divCartasMaquina.append(imgCarta);
+    const crearCarta = (carta, turno) =>{
+        const imgCarta = document.createElement('img');
+        imgCarta.src = `assets/cartas/${carta}.png`;
+        imgCarta.classList.add('carta');
+        divCartasJugadores[turno].append(imgCarta);
+    }
 
-            if(puntosMinimos > 21){
-                break;
-            }
-
-        } while ((puntosMaquina < puntosMinimos) && (puntosMinimos <= 21));
+    const determinarGanador = () =>{
+        const [puntosMinimos, puntosMaquina] = puntosJugadores;
 
         setTimeout(() => {
             if(puntosMinimos === puntosMaquina){
@@ -102,20 +115,29 @@
             }else if(puntosMaquina > puntosMinimos){
                 alert('Perdiste, Gana la Computadora');
             }
-        }, 70);
+        }, 100);
+    }
+
+    //Turno de la Maquina
+    const turnoMaquina = (puntosMinimos) =>{
+        let puntosMaquina = 0;
+        do {
+            const carta = pedirCarta();
+            puntosMaquina = acumularPuntos(carta, puntosJugadores.length -1);
+            crearCarta(carta, puntosJugadores.length -1)
+
+        } while ((puntosMaquina < puntosMinimos) && (puntosMinimos <= 21));
+
+        determinarGanador();
+        
     }
 
     //Nota: Callback: Es una funcion que se esta mandando como argumento
     //Eventos
     btnPedir.addEventListener('click', () => {
         const carta = pedirCarta();
-        puntosJugador = puntosJugador + valorCarta (carta);
-        puntosHTML[0].innerText = puntosJugador;
-
-        const imgCarta = document.createElement('img');
-        imgCarta.src = `assets/cartas/${carta}.png`;
-        imgCarta.classList.add('carta');
-        divCartasJugador.append(imgCarta);
+        const puntosJugador = acumularPuntos(carta, 0);
+        crearCarta(carta,0);
 
         if(puntosJugador > 21){
             console.warn('Perdiste');
@@ -133,22 +155,16 @@
     btnDetener.addEventListener('click', () =>{
         btnPedir.disabled = true;
         btnDetener.disabled = true;
-        turnoMaquina(puntosJugador);
+        turnoMaquina(puntosJugadores[0]);
     });
 
     btnNuevo.addEventListener('click', () =>{
-        console.clear();
-        deck = [];
-        crearDeck();
-        puntosJugador = 0;
-        puntosMaquina = 0;
-        puntosHTML[0].innerText = 0;
-        puntosHTML[1].innerText = 0;
-        divCartasJugador.innerHTML = ''; 
-        divCartasMaquina.innerHTML = ''; 
-        btnPedir.disabled = false;
-        btnDetener.disabled = false;
+        inicializarJuego();
     });
+
+    //Si se retorna algo en una funcion eso es lo unico que sera publico
+    //Para visualiar con otro nombre externo a este script se coloca como a continuacion
+    return {nuevoJuego: inicializarJuego};
 })();
 
 
